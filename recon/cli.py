@@ -10,21 +10,14 @@ from .portscan import PortScanner
 from .shodan_api import ShodanLookup
 from .report import ReportGenerator
 
-console = Console()
+console = Console(force_terminal=True)
 
-BANNER = """
-██████╗ ███████╗ ██████╗ ██████╗ ███╗   ██╗
-██╔══██╗██╔════╝██╔════╝██╔═══██╗████╗  ██║
-██████╔╝█████╗  ██║     ██║   ██║██╔██╗ ██║
-██╔══██╗██╔══╝  ██║     ██║   ██║██║╚██╗██║
-██║  ██║███████╗╚██████╗╚██████╔╝██║ ╚████║
-╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝
-       ████████╗ ██████╗  ██████╗ ██╗     ██╗  ██╗██╗████████╗
-          ██╔══╝██╔═══██╗██╔═══██╗██║     ██║ ██╔╝██║╚══██╔══╝
-          ██║   ██║   ██║██║   ██║██║     █████╔╝ ██║   ██║
-          ██║   ██║   ██║██║   ██║██║     ██╔═██╗ ██║   ██║
-          ██║   ╚██████╔╝╚██████╔╝███████╗██║  ██╗██║   ██║
-          ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝   ╚═╝
+BANNER = r"""
+ ____  _____ ____  ___  _   _       _____ ___   ___  _     _  _____ _____
+|  _ \| ____/ ___|/ _ \| \ | |     |_   _/ _ \ / _ \| |   | |/ /_ _|_   _|
+| |_) |  _|| |  | | | |  \| |       | || | | | | | || |   | ' / | |  | |
+|  _ <| |__| |__| |_| | |\  |       | || |_| | |_| || |___| . \ | |  | |
+|_| \_\_____\____\___/|_| \_|       |_| \___/ \___/|_____|_|\_\___| |_|
 """
 
 
@@ -47,7 +40,7 @@ def subdomains(target, wordlist, threads, output, no_crt):
     \b
     Examples:
       recon subdomains example.com
-      recon subdomains example.com -w /path/to/wordlist.txt -t 100
+      recon subdomains example.com -w wordlist.txt -t 100
       recon subdomains example.com -o results.txt
     """
     _print_banner()
@@ -57,7 +50,7 @@ def subdomains(target, wordlist, threads, output, no_crt):
 @cli.command()
 @click.argument("target")
 @click.option("--ports", "-p", default="common", show_default=True,
-              help="Port range: 'common', 'top1000', or '1-65535' or '80,443,8080'")
+              help="Port range: 'common', 'top1000', '1-65535' or '80,443,8080'")
 @click.option("--timeout", "-t", default=1.0, show_default=True, help="Connection timeout in seconds")
 @click.option("--output", "-o", default=None, help="Save results to file (txt)")
 def portscan(target, ports, timeout, output):
@@ -116,8 +109,8 @@ def _print_banner():
     console.print(text)
     console.print(
         Panel.fit(
-            "[bold white]Passive Recon Toolkit[/bold white] · [dim]v1.0.0[/dim]",
-            box=box.ROUNDED,
+            "[bold white]Passive Recon Toolkit[/bold white] - [dim]v1.0.0[/dim]",
+            box=box.ASCII,
             border_style="cyan",
         )
     )
@@ -166,17 +159,14 @@ async def _run_shodan(target, api_key, output):
 async def _run_full(target, wordlist, threads, ports, shodan_key, output, no_crt):
     console.print(f"[bold cyan]Target:[/bold cyan] [bold white]{target}[/bold white]\n")
 
-    # 1. Subdomains
     console.rule("[cyan]Phase 1: Subdomain Enumeration[/cyan]")
     subdomain_scanner = SubdomainScanner(target, wordlist=wordlist, threads=threads, use_crt=not no_crt)
     subdomains_found = await subdomain_scanner.run()
 
-    # 2. Port scan
     console.rule("[cyan]Phase 2: Port Scanning[/cyan]")
     port_scanner = PortScanner(target, ports=ports)
     open_ports = await port_scanner.run()
 
-    # 3. Shodan (optional)
     shodan_data = None
     if shodan_key:
         console.rule("[cyan]Phase 3: Shodan Lookup[/cyan]")
@@ -185,7 +175,6 @@ async def _run_full(target, wordlist, threads, ports, shodan_key, output, no_crt
     else:
         console.print("[dim]Shodan skipped (no API key provided)[/dim]\n")
 
-    # 4. Report
     console.rule("[cyan]Phase 4: Generating Report[/cyan]")
     reporter = ReportGenerator(
         target=target,
