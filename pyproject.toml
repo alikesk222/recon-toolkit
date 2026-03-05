@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "recon-toolkit"
+version = "1.0.0"
+description = "Passive reconnaissance toolkit for bug bounty hunters and pentesters"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11"
+authors = [{ name = "your-username" }]
+keywords = ["security", "recon", "pentest", "bug-bounty", "subdomain", "portscan", "shodan"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+]
+dependencies = [
+    "click>=8.1.0",
+    "rich>=13.0.0",
+    "aiohttp>=3.9.0",
+    "dnspython>=2.4.0",
+    "shodan>=1.31.0",
+]
+
+[project.scripts]
+recon = "recon.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/recon-toolkit"
+Repository = "https://github.com/yourusername/recon-toolkit"
+Issues = "https://github.com/yourusername/recon-toolkit/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["recon*"]
+
+[tool.setuptools.package-data]
+recon = ["../wordlists/*.txt"]
